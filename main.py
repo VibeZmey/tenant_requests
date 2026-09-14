@@ -31,14 +31,13 @@ def generate_request_card(tenant_name, flat_number, request_type, is_urgent):
     today = date.today()
     deadline_info = calculate_deadline(priority, today)
     
-    card = "--- КАРТОЧКА ЗАЯВКИ ---\n"
+    card = "КАРТОЧКА ЗАЯВКИ\n"
     card += f"Жилец: {tenant_name}\n"
     card += f"Квартира: {str(flat_number)}\n" 
     card += f"Проблема: {request_type}\n"
     card += f"Приоритет: {priority}\n"
     card += f"Срок выполнения: {deadline_info}\n"
-    card += f"Предв. стоимость: {final_cost} руб.\n"
-    card += "------------------------"
+    card += f"Предварительная стоимость: {final_cost} руб.\n"
     return card
 
 if __name__ == "__main__":
