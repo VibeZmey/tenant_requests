@@ -1,54 +1,54 @@
-from datetime import date, timedelta
+from utils import input_int, input_date
+from storage import load_data, save_data
+from request_manager import create_request, find_requests_by_flat, get_status_text
+from datetime import date
 
-def get_request_priority(request_type):
-    if request_type == "Прорыв трубы" or request_type == "Нет отопления":
-        return "Критический"
-    elif request_type == "Неисправность розетки" or request_type == "Капающий кран":
-        return "Средний"
-    else:
-        return "Низкий"
+def show_menu() -> None:
+    print("\n=== СИСТЕМА УПРАВЛЕНИЯ ЗАЯВКАМИ ===")
+    print("1. Создать новую заявку")
+    print("2. Посмотреть заявки по квартире")
+    print("3. Показать все заявки")
+    print("0. Выход")
 
-def calculate_deadline(priority, current_date):
-    if priority == "Критический":
-        deadline = current_date + timedelta(hours=2)
-        return f"В течение 2 часов (до {deadline})"
-    elif priority == "Средний":
-        deadline = current_date + timedelta(days=3)
-        return f"В течение 3 дней (до {deadline})"
-    else:
-        deadline = current_date + timedelta(days=7)
-        return f"В течение 7 дней (до {deadline})"
+def main() -> None:
+    requests = load_data("requests.json")
 
-def generate_request_card(tenant_name, flat_number, request_type, is_urgent):
-    priority = get_request_priority(request_type)
-    
-    base_cost = 500.0
-    if is_urgent:
-        final_cost = base_cost * 1.5
-    else:
-        final_cost = base_cost
-        
-    today = date.today()
-    deadline_info = calculate_deadline(priority, today)
-    
-    card = "КАРТОЧКА ЗАЯВКИ\n"
-    card += f"Жилец: {tenant_name}\n"
-    card += f"Квартира: {str(flat_number)}\n" 
-    card += f"Проблема: {request_type}\n"
-    card += f"Приоритет: {priority}\n"
-    card += f"Срок выполнения: {deadline_info}\n"
-    card += f"Предварительная стоимость: {final_cost} руб.\n"
-    return card
+    while True:
+        show_menu()
+        choice = input_int("Выберите действие: ")
+
+        if choice == 1:
+            name = input("ФИО жильца: ")
+            flat = input_int("Номер квартиры: ")
+            problem = input("Описание проблемы: ")
+            req_date = input_date("Дата заявки (ДД.ММ.ГГГГ): ")
+
+            new_req = create_request(requests, name, flat, problem, req_date)
+            print(f"Заявка №{new_req['id']} успешно создана!")
+            save_data("requests.json", requests)  # Сохраняем после изменения
+
+        elif choice == 2:
+            flat = input_int("Введите номер квартиры для поиска: ")
+            found = find_requests_by_flat(requests, flat)
+            if not found:
+                print("Заявок не найдено.")
+            else:
+                for req in found:
+                    print(f"№{req['id']}: {req['problem']} | Статус: {get_status_text(req['status'])}")
+
+        elif choice == 3:
+            if not requests:
+                print("Список заявок пуст.")
+            else:
+                for req in requests:
+                    print(f"№{req['id']} | Кв. {req['flat']} | {req['tenant']} | {req['date']}")
+
+        elif choice == 0:
+            print("До свидания!")
+            break
+        else:
+            print("Неверный выбор.")
+
 
 if __name__ == "__main__":
-    print("Система управления заявками жильцов. Создание новой заявки.")
-    
-    name = input("Введите ФИО жильца: ")
-    flat = int(input("Введите номер квартиры: "))
-    problem = input("Опишите проблему (например, 'Прорыв трубы'): ")
-    urgent_input = input("Требуется срочный выезд? (да/нет): ")
-    
-    is_urgent = True if urgent_input.lower() == "да" else False
-    
-    request_card = generate_request_card(name, flat, problem, is_urgent)
-    print("\n" + request_card)
+    main()
