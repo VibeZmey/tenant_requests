@@ -1,10 +1,20 @@
 [
     {
         "id": 1,
-        "tenant": "Змеев Илья Викторович",
-        "flat": 109,
+        "tenant_id": 1,
         "problem": "нет электричества",
         "date": "2026-09-20",
-        "status": "Новая"
+        "category": "электрика",
+        "status": "В работе",
+        "executor_id": 1
+    },
+    {
+        "id": 2,
+        "tenant_id": 1,
+        "problem": "протечка",
+        "date": "2026-09-27",
+        "category": "сантехника",
+        "status": "Новая",
+        "executor_id": null
     }
 ]

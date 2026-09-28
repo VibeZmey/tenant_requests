@@ -1,0 +1,14 @@
+[
+    {
+        "id": 1,
+        "name": "Петров Пётр Петрович",
+        "specialization": "электрика",
+        "is_busy": true
+    },
+    {
+        "id": 2,
+        "name": "Сидоров Сидор Сидорович",
+        "specialization": "сантехника",
+        "is_busy": false
+    }
+]
