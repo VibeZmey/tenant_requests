@@ -1,0 +1,11 @@
+.room-card {
+    transition: transform 0.2s;
+    border-left: 4px solid #0d6efd;
+}
+.room-card:hover {
+    transform: translateY(-3px);
+}
+.status-badge {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
