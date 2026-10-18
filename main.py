@@ -1,5 +1,5 @@
 """Точка входа в приложение «Система управления заявками жильцов»."""
-from typing import List, Optional
+from typing import List
 
 from models import Request, Tenant, Executor
 from models.tenants import add_tenant, find_tenant_by_id, show_tenants
@@ -26,7 +26,7 @@ from utils import input_int, input_date
 
 
 def show_menu() -> None:
-    print("\n=== СИСТЕМА УПРАВЛЕНИЯ ЗАЯВКАМИ ===")
+    print("\nСИСТЕМА УПРАВЛЕНИЯ ЗАЯВКАМИ ")
     print("1. Создать новую заявку")
     print("2. Посмотреть заявки по квартире")
     print("3. Показать все заявки")
