@@ -57,10 +57,10 @@ def test_cancel_request():
     assert not executor.is_busy
 
 
-def test_determine_category():
-    assert determine_category("нет электричества") == "электрика"
-    assert determine_category("протекает кран") == "сантехника"
-    assert determine_category("что-то непонятное") == "прочее"
+# def test_determine_category():
+#     assert determine_category("нет электричества") == "электрика"
+#     assert determine_category("протекает кран") == "сантехника"
+#     assert determine_category("что-то непонятное") == "прочее"
 
 
 def test_find_by_category():

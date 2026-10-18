@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Главная - Система управления заявками{% endblock %}
+
+{% block content %}
+<div class="text-center mt-5">
+    <h1 class="display-4 fw-bold">Система управления заявками</h1>
+    <hr class="my-4">
+    <a href="{% url 'requests:request_list' %}" class="btn btn-primary btn-lg me-2">Список заявок</a>
+    <a href="{% url 'tenants:tenant_list' %}" class="btn btn-secondary btn-lg me-2">Жильцы</a>
+    <a href="{% url 'executors:executor_list' %}" class="btn btn-success btn-lg">Исполнители</a>
+</div>
+{% endblock %}

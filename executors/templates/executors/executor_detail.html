@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}{{ executor.name }} - Исполнитель{% endblock %}
+
+{% block content %}
+{% if executor %}
+    <div class="card shadow-sm mt-4">
+        <div class="card-body">
+            <h2 class="card-title">{{ executor.name }}</h2>
+            <p class="card-text"><strong>ID:</strong> {{ executor.id }}</p>
+            <p class="card-text"><strong>Специализация:</strong> {{ executor.specialization }}</p>
+            <p class="card-text">
+                <strong>Статус:</strong> 
+                {% include "executors/includes/executor_status.html" %}
+            </p>
+        </div>
+    </div>
+{% else %}
+    <h1 class="text-danger">Исполнитель не найден</h1>
+{% endif %}
+<a href="{% url 'executors:executor_list' %}" class="btn btn-outline-secondary mt-3">← К списку исполнителей</a>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Исполнители - Система управления заявками{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Исполнители</h1>
+<p class="text-muted">Всего исполнителей: {{ executors|length }}</p>
+
+<div class="row">
+    {% for executor in executors %}
+        {% include "executors/includes/executor_card.html" %}
+    {% empty %}
+        <p class="text-danger">Список исполнителей пуст.</p>
+    {% endfor %}
+</div>
+{% endblock %}

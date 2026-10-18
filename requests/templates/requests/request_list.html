@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Заявки - Система управления заявками{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Заявки жильцов</h1>
+<p class="text-muted">Всего заявок: {{ requests|length }}</p>
+
+<ul class="list-group">
+    {% for req in requests %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+            <a href="{% url 'requests:request_detail' req.id %}" class="fw-bold text-decoration-none">
+                Заявка №{{ req.id }} (Кв. {{ req.tenant.flat }})
+            </a>
+            <br>
+            <small class="text-muted">{{ req.problem|truncatechars:40 }} | {{ req.date|date:"d.m.Y" }}</small>
+        </div>
+        {% include "requests/includes/request_status.html" with req=req %}
+    </li>
+    {% empty %}
+    <li class="list-group-item text-danger">Заявок нет.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

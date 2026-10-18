@@ -1,0 +1,12 @@
+<div class="col-md-4 mb-4">
+    <div class="card room-card h-100">
+        <div class="card-body">
+            <h5 class="card-title">{{ tenant.name|default:"Без имени" }}</h5>
+            <p class="card-text">
+                <strong>Квартира:</strong> {{ tenant.flat }}<br>
+                <strong>Телефон:</strong> {{ tenant.phone|default:"Не указан" }}
+            </p>
+            <a href="{% url 'tenants:tenant_detail' tenant.id %}" class="btn btn-outline-primary btn-sm">Подробнее</a>
+        </div>
+    </div>
+</div>

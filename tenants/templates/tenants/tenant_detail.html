@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}{{ tenant.name }} - Жилец{% endblock %}
+
+{% block content %}
+{% if tenant %}
+    <div class="card shadow-sm mt-4">
+        <div class="card-body">
+            <h2 class="card-title">{{ tenant.name }}</h2>
+            <p class="card-text"><strong>ID:</strong> {{ tenant.id }}</p>
+            <p class="card-text"><strong>Квартира:</strong> {{ tenant.flat }}</p>
+            <p class="card-text"><strong>Телефон:</strong> {{ tenant.phone|default:"Не указан" }}</p>
+        </div>
+    </div>
+{% else %}
+    <h1 class="text-danger">Жилец не найден</h1>
+{% endif %}
+<a href="{% url 'tenants:tenant_list' %}" class="btn btn-outline-secondary mt-3">← К списку жильцов</a>
+{% endblock %}

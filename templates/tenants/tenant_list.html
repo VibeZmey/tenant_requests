@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Жильцы - Система управления заявками{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Жильцы</h1>
+<p class="text-muted">Всего жильцов: {{ tenants|length }}</p>
+
+<div class="row">
+    {% for tenant in tenants %}
+        {% include "tenants/includes/tenant_card.html" %}
+    {% empty %}
+        <p class="text-danger">Список жильцов пуст.</p>
+    {% endfor %}
+</div>
+{% endblock %}

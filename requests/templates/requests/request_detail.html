@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Заявка №{{ req.id }} - Система управления заявками{% endblock %}
+
+{% block content %}
+{% if req %}
+    <div class="card shadow-sm mt-4">
+        <div class="card-body">
+            <h2 class="card-title">Заявка №{{ req.id }}</h2>
+            <h6 class="card-subtitle mb-3 text-muted">Дата: {{ req.date|date:"d.m.Y" }}</h6>
+
+            <p class="card-text"><strong>Проблема:</strong> {{ req.problem }}</p>
+            <p class="card-text"><strong>Категория:</strong> {{ req.category }}</p>
+            <p class="card-text"><strong>Жилец:</strong> {{ req.tenant.name }} (кв. {{ req.tenant.flat }})</p>
+
+            <p class="card-text">
+                <strong>Исполнитель:</strong>
+                {% if req.executor %}
+                    <a href="{% url 'executors:executor_detail' req.executor.id %}">{{ req.executor.name }}</a>
+                {% else %}
+                    <span class="text-muted">Не назначен</span>
+                {% endif %}
+            </p>
+
+            <p class="card-text">
+                <strong>Статус:</strong>
+                {% include "requests/includes/request_status.html" with req=req %}
+            </p>
+        </div>
+    </div>
+{% else %}
+    <h1 class="text-danger">Заявка не найдена</h1>
+{% endif %}
+<a href="{% url 'requests:request_list' %}" class="btn btn-outline-secondary mt-3">← К списку заявок</a>
+{% endblock %}

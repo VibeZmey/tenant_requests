@@ -1,0 +1,9 @@
+{% if req.status == "Выполнена" %}
+    <span class="badge bg-success status-badge">{{ req.status }}</span>
+{% elif req.status == "В работе" %}
+    <span class="badge bg-warning text-dark status-badge">{{ req.status }}</span>
+{% elif req.status == "Отменена" %}
+    <span class="badge bg-secondary status-badge">{{ req.status }}</span>
+{% else %}
+    <span class="badge bg-primary status-badge">{{ req.status }}</span>
+{% endif %}
