@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}Карточка заявки{% endblock %}
+{% block content %}
+<h1>Карточка заявки</h1>
+{% if req %}<h2>Заявка №{{ req.id }}</h2><p>{{ req.problem }} / {{ req.date }} / {{ req.category }} / {{ req.status }}</p><p>Жилец: <a href="{% url 'tenants:tenant_detail' req.tenant_id %}">{{ req.tenant_name }}</a>, квартира {{ req.flat }}</p><p>Исполнитель: {% if req.executor_id %}<a href="{% url 'executors:executor_detail' req.executor_id %}">{{ req.executor_name }}</a>{% else %}Не назначен{% endif %}</p>{% else %}<p>Заявка не найдена.</p>{% endif %}<a href="{% url 'requests:request_list' %}">К списку заявок</a>
+{% endblock %}

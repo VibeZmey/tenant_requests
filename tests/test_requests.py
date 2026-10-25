@@ -5,7 +5,6 @@ from models.requests import (
     create_request,
     find_requests_by_flat,
     find_requests_by_category,
-    determine_category,
 )
 
 
