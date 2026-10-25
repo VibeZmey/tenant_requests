@@ -4,7 +4,7 @@ from models.tenants import find_tenant_by_id
 
 def tenant_list(request):
     tenants = load_tenants("tenants.json")
-    return render(request, "tenants/tenant_list.html", {"tenants": tenants})
+    return render(request, "tenants/tenant_list.html", {"tenants": None})
 
 def tenant_detail(request, tenant_id: int):
     tenants = load_tenants("tenants.json")
