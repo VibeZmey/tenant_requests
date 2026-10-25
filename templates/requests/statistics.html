@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Статистика заявок{% endblock %}
+{% block content %}
+<h1>Статистика заявок</h1>
+<p>Всего заявок: {{ totals.total }}. Выполнено: {{ totals.done }}. Без исполнителя: {{ totals.unassigned }}.</p><p>Всего исполнителей: {{ staff.total }}. Заняты по учетному признаку: {{ staff.busy }}. Свободны по учетному признаку: {{ staff.free }}.</p>
+<h2>Категории</h2><table class="table"><tr><th>Категория</th><th>Количество</th><th>Первая дата</th><th>Последняя дата</th></tr>{% for c in categories %}<tr><td>{{ c.category }}</td><td>{{ c.total }}</td><td>{{ c.first_date }}</td><td>{{ c.last_date }}</td></tr>{% empty %}<tr><td colspan="4">Нет данных.</td></tr>{% endfor %}</table>
+<h2>Нагрузка исполнителей</h2><form method="get"><label>Минимум заявок <input type="number" min="0" name="minimum" value="{{ minimum }}"></label> <button class="btn btn-primary">Применить HAVING</button></form><table class="table"><tr><th>Исполнитель</th><th>Всего заявок</th><th>Активные</th></tr>{% for e in workload %}<tr><td>{{ e.name }}</td><td>{{ e.total }}</td><td>{{ e.active }}</td></tr>{% empty %}<tr><td colspan="3">Нет исполнителей с указанной нагрузкой.</td></tr>{% endfor %}</table>
+{% endblock %}

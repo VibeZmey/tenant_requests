@@ -1,17 +1,23 @@
 from django.shortcuts import render
-from storage import load_tenants
-from models.tenants import find_tenant_by_id
+from db.database import fetch
+
 
 def tenant_list(request):
-    tenants = load_tenants("tenants.json")
-    return render(request, "tenants/tenant_list.html", {"tenants": tenants})
+    q = request.GET.get("q", "").strip()
+    try:
+        page = max(1, min(int(request.GET.get("page", 1)), 1000000))
+    except ValueError:
+        page = 1
+    tenants = (fetch("tenant_search", ("%" + q + "%", q)) if q
+               else fetch("tenants", (20, (page - 1) * 20)))
+    return render(request, "tenants/tenant_list.html", {
+        "tenants": tenants, "q": q, "page": page,
+        "next_page": page + 1, "previous_page": max(1, page - 1),
+    })
 
-def tenant_detail(request, tenant_id: int):
-    tenants = load_tenants("tenants.json")
-    tenant = find_tenant_by_id(tenants, tenant_id)
-    return render(
-        request,
-        "tenants/tenant_detail.html",
-        {"tenant": tenant},
-        status=404 if tenant is None else 200
-    )
+
+def tenant_detail(request, tenant_id):
+    tenant = fetch("tenant_detail", (tenant_id,), one=True)
+    return render(request, "tenants/tenant_detail.html", {
+        "tenant": tenant, "requests": fetch("tenant_requests", (tenant_id,)),
+    }, status=200 if tenant else 404)

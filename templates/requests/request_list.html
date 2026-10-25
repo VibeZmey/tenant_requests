@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Заявки{% endblock %}
+{% block content %}
+<h1>Заявки</h1>
+<form method="get" class="my-3"><label>Категория <input name="category" value="{{ category }}" class="form-control"></label> <label>Статус <input name="status" value="{{ status }}" class="form-control"></label> <button class="btn btn-primary">Найти</button> <a href="{% url 'requests:request_list' %}">Сбросить</a></form>
+{% include "includes/sql_requests.html" %}
+{% endblock %}

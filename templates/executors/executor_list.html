@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Исполнители{% endblock %}
+{% block content %}
+<h1>Исполнители</h1>
+<form method="get" class="my-3"><label>Специализация <input name="specialization" value="{{ specialization }}" class="form-control"></label> <label><input type="checkbox" name="available" value="1" {% if available %}checked{% endif %}> Только свободные</label> <button class="btn btn-primary">Показать</button></form><p>Специализация применяется при поиске свободных исполнителей. Свободный исполнитель не занят и не имеет активных заявок.</p>
+<table class="table"><tr><th>ФИО</th><th>Специализация</th><th>Занят</th></tr>{% for e in executors %}<tr><td><a href="{% url 'executors:executor_detail' e.id %}">{{ e.name }}</a></td><td>{{ e.specialization }}</td><td>{{ e.is_busy|yesno:"Да,Нет" }}</td></tr>{% empty %}<tr><td colspan="3">Исполнители не найдены.</td></tr>{% endfor %}</table>
+{% endblock %}

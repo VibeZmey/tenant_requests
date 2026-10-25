@@ -1,16 +1,8 @@
 {% extends "base.html" %}
-
-{% block title %}Жильцы - Система управления заявками{% endblock %}
-
+{% block title %}Жильцы{% endblock %}
 {% block content %}
-<h1 class="mb-4">Жильцы</h1>
-<p class="text-muted">Всего жильцов: {{ tenants|length }}</p>
-
-<div class="row">
-    {% for tenant in tenants %}
-        {% include "tenants/includes/tenant_card.html" %}
-    {% empty %}
-        <p class="text-danger">Список жильцов пуст.</p>
-    {% endfor %}
-</div>
+<h1>Жильцы</h1>
+<form method="get" class="my-3"><label>Имя или квартира <input name="q" value="{{ q }}" class="form-control"></label> <button class="btn btn-primary">Найти</button> <a href="{% url 'tenants:tenant_list' %}">Сбросить</a></form>
+<table class="table"><tr><th>ФИО</th><th>Квартира</th><th>Телефон</th></tr>{% for tenant in tenants %}<tr><td><a href="{% url 'tenants:tenant_detail' tenant.id %}">{{ tenant.name }}</a></td><td>{{ tenant.flat }}</td><td>{{ tenant.phone|default:"Не указан" }}</td></tr>{% empty %}<tr><td colspan="3">Жильцы не найдены.</td></tr>{% endfor %}</table>
+{% if not q %}<p>Страница {{ page }}. {% if page > 1 %}<a href="?page={{ previous_page }}">Назад</a>{% endif %} {% if tenants|length == 20 %}<a href="?page={{ next_page }}">Далее</a>{% endif %}</p>{% endif %}
 {% endblock %}

@@ -179,6 +179,7 @@ def show_requests(requests: List[Request]) -> None:
     for request in requests:
         print(request)
 
+
 def find_request_by_id(requests: List[Request], request_id: int) -> Optional[Request]:
     """Найти заявку по идентификатору (добавлено для ПР5)."""
     for req in requests:
