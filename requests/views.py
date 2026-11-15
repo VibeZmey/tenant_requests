@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404, render
 from executors.models import Executor
 
 from .forms import SORT_OPTIONS, RequestFilters
-from .models import ACTIVE_STATUSES, Request, request_rows
+from .models import ACTIVE_STATUSES, Request, RequestStatus, request_rows
 
 
 def request_list(request):
@@ -13,7 +13,7 @@ def request_list(request):
     form.is_valid()
     data = form.cleaned_data
     filters = {
-        field: data[field] for field in ("category", "status", "date")
+        field: data[field] for field in ("category", "status")
         if data.get(field)
     }
     for field in ("tenant", "executor"):
@@ -21,6 +21,8 @@ def request_list(request):
             filters[f"{field}_id"] = data[field]
     ordering = SORT_OPTIONS.get(data.get("sort"), SORT_OPTIONS["newest"])
     queryset = Request.objects.filter(**filters)
+    if data.get("date"):
+        queryset = queryset.for_date(data["date"])
     if data.get("tenant_name"):
         queryset = queryset.filter(tenant__name__icontains=data["tenant_name"])
     if data.get("q"):
@@ -44,7 +46,10 @@ def statistics(request):
     except ValueError:
         minimum = 0
     totals = Request.objects.aggregate(
-        total=Count("pk"), done=Count("pk", filter=Q(status="Выполнена")),
+        total=Count("pk"), done=Count("pk", filter=Q(status=RequestStatus.COMPLETED)),
+        new=Count("pk", filter=Q(status=RequestStatus.NEW)),
+        in_progress=Count("pk", filter=Q(status=RequestStatus.IN_PROGRESS)),
+        cancelled=Count("pk", filter=Q(status=RequestStatus.CANCELLED)),
         unassigned=Count("pk", filter=Q(executor__isnull=True)),
     )
     staff = Executor.objects.aggregate(

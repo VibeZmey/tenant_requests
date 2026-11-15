@@ -1,10 +1,35 @@
 from django.db import models
 from django.urls import reverse
 
-ACTIVE_STATUSES = ("Новая", "В работе")
+
+class RequestStatus(models.TextChoices):
+    NEW = "new", "Новая"
+    IN_PROGRESS = "in_progress", "В работе"
+    COMPLETED = "completed", "Выполнена"
+    CANCELLED = "cancelled", "Отменена"
+
+
+ACTIVE_STATUSES = (RequestStatus.NEW, RequestStatus.IN_PROGRESS)
+LEGACY_STATUS_CODES = {label: code for code, label in RequestStatus.choices}
+
+
+class RequestQuerySet(models.QuerySet):
+    def active(self):
+        return self.filter(status__in=ACTIVE_STATUSES)
+
+    def cancelled(self):
+        return self.filter(status=RequestStatus.CANCELLED)
+
+    def completed(self):
+        return self.filter(status=RequestStatus.COMPLETED)
+
+    def for_date(self, day):
+        return self.filter(date=day)
 
 
 class Request(models.Model):
+    Status = RequestStatus
+
     tenant = models.ForeignKey(
         "tenants.Tenant", models.PROTECT, related_name="requests", verbose_name="Жилец",
     )
@@ -15,14 +40,18 @@ class Request(models.Model):
     problem = models.TextField("Проблема")
     date = models.DateField("Дата")
     category = models.CharField("Категория", max_length=120)
-    status = models.CharField("Статус", max_length=20, default="Новая")
+    status = models.CharField("Статус", max_length=20, choices=Status, default=Status.NEW)
+
+    objects = RequestQuerySet.as_manager()
 
     class Meta:
+        verbose_name = "заявка"
+        verbose_name_plural = "заявки"
         ordering = ("-date", "-pk")
         indexes = [models.Index(fields=["category", "status"])]
         constraints = [
             models.CheckConstraint(
-                condition=models.Q(status__in=(*ACTIVE_STATUSES, "Выполнена", "Отменена")),
+                condition=models.Q(status__in=RequestStatus.values),
                 name="request_status_valid",
             ),
         ]

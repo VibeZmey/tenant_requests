@@ -2,9 +2,12 @@ from datetime import date
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group, Permission
 from django.core.management import call_command
 from django.db.models import ProtectedError
 from django.test import TestCase
+from django.urls import reverse
 
 from db.import_json import import_data
 from executors.models import Executor
@@ -68,3 +71,92 @@ class RequestPageTests(TestCase):
         self.assertEqual(response.context["page_obj"][0]["problem"], "Проверка 11")
         with self.assertNumQueries(1):
             self.assertContains(self.client.get("/requests/1/"), "Петров")
+
+    def test_status_and_executor_availability(self):
+        req = Request.objects.select_related("executor").get(pk=1)
+        executor = req.executor
+        executor.is_busy = False
+        executor.save(update_fields=["is_busy"])
+        req.status = Request.Status.IN_PROGRESS
+        req.save(update_fields=["status"])
+        params = {"available": "1", "date": req.date.isoformat()}
+        response = self.client.get("/executors/", params)
+        self.assertNotContains(response, executor.name)
+        self.assertContains(response, 'value="1"')
+        self.assertContains(
+            self.client.get("/executors/", {**params, "date": "2025-01-01"}), executor.name,
+        )
+        for status in (Request.Status.CANCELLED, Request.Status.COMPLETED):
+            req.status = status
+            req.save(update_fields=["status"])
+            self.assertContains(self.client.get("/executors/", params), executor.name)
+        self.assertTrue(Request.objects.completed().for_date(req.date).filter(pk=req.pk).exists())
+        self.assertContains(self.client.get("/requests/", {"status": "Выполнена"}), req.problem)
+        self.assertContains(self.client.get("/requests/statistics/"), "Выполнено: 1")
+
+    def test_executor_slug_and_legacy_url(self):
+        executor = Executor.objects.get(pk=1)
+        self.assertContains(self.client.get("/executors/"), executor.get_absolute_url())
+        self.assertContains(self.client.get(executor.get_absolute_url()), executor.name)
+        self.assertContains(self.client.get("/executors/1/"), executor.name)
+        self.assertEqual(self.client.get("/executors/profile/nonexistent/").status_code, 404)
+
+
+class RequestAdminTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        users = get_user_model().objects
+        cls.admin = users.create_superuser("test-admin")
+        cls.staff = users.create_user("test-staff", is_staff=True)
+        group = Group.objects.create(name="Операторы")
+        group.permissions.set(Permission.objects.filter(
+            content_type__app_label="executors", codename__in=(
+                "view_executor", "add_executor", "change_executor",
+            ),
+        ))
+        cls.staff.groups.add(group)
+        cls.tenant = Tenant.objects.create(name="Жилец для проверки", flat=12)
+        cls.executor = Executor.objects.create(name="Мастер", specialization="Учебная")
+        cls.req = Request.objects.create(
+            tenant=cls.tenant, executor=cls.executor, date="2026-06-01",
+            category="Учебная", problem="Проверка Django Admin",
+        )
+
+    def test_admin_search_inline_and_status_edit(self):
+        self.client.force_login(self.admin)
+        self.assertContains(self.client.get(reverse("admin:index")), "Исполнители")
+        response = self.client.get(reverse("admin:requests_request_changelist"), {
+            "q": self.tenant.name, "status__exact": Request.Status.NEW,
+        })
+        self.assertContains(response, str(self.tenant))
+        for name, obj in (("tenants_tenant", self.tenant), ("executors_executor", self.executor)):
+            url = reverse(f"admin:{name}_change", args=[obj.pk])
+            self.assertContains(self.client.get(url), self.req.problem)
+
+        url = reverse("admin:requests_request_change", args=[self.req.pk])
+        response = self.client.post(url, {
+            "tenant": self.tenant.pk, "executor": self.executor.pk,
+            "date": "2026-06-01", "category": "Учебная", "problem": self.req.problem,
+            "status": Request.Status.CANCELLED, "_save": "Сохранить",
+        })
+        self.assertEqual(response.status_code, 302)
+        self.req.refresh_from_db()
+        self.assertEqual(self.req.status, Request.Status.CANCELLED)
+        self.assertTrue(Request.objects.cancelled().filter(pk=self.req.pk).exists())
+        self.assertContains(self.client.get(self.req.get_absolute_url()), "Отменена")
+        self.assertContains(self.client.get("/requests/statistics/"), "Отменено: 1")
+
+    def test_permissions_and_protected_delete(self):
+        url = reverse("admin:executors_executor_delete", args=[self.executor.pk])
+        self.assertEqual(self.client.get(url).status_code, 302)
+        self.client.force_login(self.staff)
+        for action in ("changelist", "add"):
+            self.assertEqual(
+                self.client.get(reverse(f"admin:executors_executor_{action}")).status_code, 200,
+            )
+        edit = reverse("admin:executors_executor_change", args=[self.executor.pk])
+        self.assertEqual(self.client.get(edit).status_code, 200)
+        self.assertEqual(self.client.get(url).status_code, 403)
+        self.client.force_login(self.admin)
+        self.assertContains(self.client.get(url), str(self.req))
+        self.assertTrue(Executor.objects.filter(pk=self.executor.pk).exists())

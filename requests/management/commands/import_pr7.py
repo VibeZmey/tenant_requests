@@ -8,7 +8,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import DatabaseError, transaction
 
 from executors.models import Executor
-from requests.models import Request
+from requests.models import LEGACY_STATUS_CODES, Request
 from tenants.models import Tenant
 
 
@@ -41,6 +41,7 @@ class Command(BaseCommand):
         pk = values.pop("id")
         if model is Request:
             values["date"] = date.fromisoformat(values["date"])
+            values["status"] = LEGACY_STATUS_CODES.get(values["status"], values["status"])
         elif model is Executor:
             values["is_busy"] = bool(values["is_busy"])
         obj, created = model.objects.get_or_create(pk=pk, defaults=values)

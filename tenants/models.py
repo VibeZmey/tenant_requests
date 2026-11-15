@@ -8,6 +8,8 @@ class Tenant(models.Model):
     phone = models.CharField("Телефон", max_length=30, blank=True, null=True)
 
     class Meta:
+        verbose_name = "жилец"
+        verbose_name_plural = "жильцы"
         ordering = ("flat", "pk")
         constraints = [
             models.CheckConstraint(condition=models.Q(flat__gt=0), name="tenant_flat_positive"),
