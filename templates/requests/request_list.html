@@ -2,6 +2,17 @@
 {% block title %}Заявки{% endblock %}
 {% block content %}
 <h1>Заявки</h1>
-<form method="get" class="my-3"><label>Категория <input name="category" value="{{ category }}" class="form-control"></label> <label>Статус <input name="status" value="{{ status }}" class="form-control"></label> <button class="btn btn-primary">Найти</button> <a href="{% url 'requests:request_list' %}">Сбросить</a></form>
-{% include "includes/sql_requests.html" %}
+<form method="get" class="my-3">
+    {{ form.as_p }}
+    <button class="btn btn-primary">Найти</button>
+    <a href="{% url 'requests:request_list' %}">Сбросить</a>
+</form>
+{% include "includes/request_rows.html" %}
+{% if page_obj.has_other_pages %}
+<nav aria-label="Страницы заявок">
+    {% if page_obj.has_previous %}<a href="{% querystring page=page_obj.previous_page_number %}">Назад</a>{% endif %}
+    <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}<a href="{% querystring page=page_obj.next_page_number %}">Далее</a>{% endif %}
+</nav>
+{% endif %}
 {% endblock %}
